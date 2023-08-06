@@ -1,0 +1,1 @@
+<h1 class="text-1xl text-center mt-10">hello hello</h1>
