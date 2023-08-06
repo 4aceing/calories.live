@@ -7,9 +7,18 @@
   import ProfileAvatar from '../components/ProfileAvatar.svelte';
   import SideBar from '../components/SideBar.svelte';
   import CharmMenuHamburger from '~icons/charm/menu-hamburger';
+  import { modeCurrent } from '@skeletonlabs/skeleton';
 
   $: positionClasses = $drawerStore.open ? 'translate-x-[75%]' : '';
 </script>
+
+<svelte:head>
+  {#if $modeCurrent}
+    <meta name="theme-color" content="#ffffff" />
+  {:else}
+    <meta name="theme-color" content="#000000" />
+  {/if}
+</svelte:head>
 
 <Modal />
 
