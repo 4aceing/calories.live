@@ -1,58 +1,47 @@
 <script lang="ts">
+  // import '../theme.css';
   import '@skeletonlabs/skeleton/themes/theme-skeleton.css';
   import '@skeletonlabs/skeleton/styles/skeleton.css';
   import '../app.css';
-  import { AppShell, AppBar, LightSwitch, popup, ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
-  import type { PopupSettings } from '@skeletonlabs/skeleton';
-  import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
-  import { storePopup } from '@skeletonlabs/skeleton';
+  import { AppShell, AppBar, Modal, Drawer, drawerStore } from '@skeletonlabs/skeleton';
+  import ProfileAvatar from '../components/ProfileAvatar.svelte';
+  import SideBar from '../components/SideBar.svelte';
   import CharmMenuHamburger from '~icons/charm/menu-hamburger';
-  storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
-  const popupCombobox: PopupSettings = {
-    event: 'focus-click',
-    target: 'popupCombobox',
-    placement: 'bottom-end',
-  };
+  $: positionClasses = $drawerStore.open ? 'translate-x-[75%]' : '';
 </script>
 
-<AppShell>
-  <svelte:fragment slot="header">
-    <AppBar>
-      <svelte:fragment slot="lead">
-        <a href="/" class="btn p-0 flex items-center gap-3" title="Homepage">
-          <img class="w-auto h-10" src="/android-chrome-256x256.png" alt="Logo" />
-          <h1 class="text-xl">Calories Live</h1>
-        </a>
-      </svelte:fragment>
+<Modal />
 
-      <svelte:fragment slot="trail">
-        <button class="md:hidden btn-icon" title="Open Menu" use:popup={popupCombobox}>
+<Drawer>
+  <SideBar />
+</Drawer>
+
+<AppShell class="transition-transform {positionClasses}" slotSidebarLeft="w-0 md:w-64 bg-surface-500/10">
+  <svelte:fragment slot="header">
+    <AppBar gap="gap-0" slotLead="md:hidden" slotTrail="place-content-end">
+      <svelte:fragment slot="lead">
+        <button on:click={() => drawerStore.open({ width: 'w-[75%]' })} class="btn-icon">
           <CharmMenuHamburger />
         </button>
+      </svelte:fragment>
 
-        <div class="card w-48 shadow-xl" data-popup="popupCombobox">
-          <ul class="p-4">
-            <li>
-              <a href="/about" class="text-left btn p-0 mb-3" title="About Page">About</a>
-            </li>
-            <hr />
-            <li>
-              <LightSwitch class="mt-4" />
-            </li>
-          </ul>
-        </div>
+      <a href="/" class="btn p-0 flex items-center gap-3" title="Homepage">
+        <img class="w-auto h-12" src="/android-chrome-256x256.png" alt="Logo" />
+        <h1 class="max-sm:hidden text-xl">Calories Live</h1>
+      </a>
 
-        <a href="/about" class="hidden md:flex btn" title="About Page">About</a>
-
-        <LightSwitch class="hidden md:block" />
+      <svelte:fragment slot="trail">
+        <ProfileAvatar />
       </svelte:fragment>
     </AppBar>
   </svelte:fragment>
 
-  <slot />
+  <svelte:fragment slot="sidebarLeft">
+    <SideBar />
+  </svelte:fragment>
 
-  <!-- <svelte:fragment slot="footer">
-    <AppBar>Footer</AppBar>
-  </svelte:fragment> -->
+  <div class="container p-10 mx-auto">
+    <slot />
+  </div>
 </AppShell>

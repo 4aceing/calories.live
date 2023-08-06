@@ -1,1 +1,1 @@
-<h1 class="text-3xl font-bold text-center mt-10">Comming soon ...</h1>
+<h1 class="text-3xl font-bold text-center">Comming soon ...</h1>

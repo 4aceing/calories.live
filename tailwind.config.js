@@ -9,5 +9,5 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [...require('@skeletonlabs/skeleton/tailwind/skeleton.cjs')()],
+  plugins: [require('@tailwindcss/forms'), ...require('@skeletonlabs/skeleton/tailwind/skeleton.cjs')()],
 };
