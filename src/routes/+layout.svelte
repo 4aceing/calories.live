@@ -3,7 +3,7 @@
   import '@skeletonlabs/skeleton/themes/theme-skeleton.css';
   import '@skeletonlabs/skeleton/styles/skeleton.css';
   import '../app.css';
-  import { AppShell, AppBar, Modal, Drawer, drawerStore } from '@skeletonlabs/skeleton';
+  import { AppShell, AppBar, Modal, Drawer, drawerStore, Toast } from '@skeletonlabs/skeleton';
   import ProfileAvatar from '../components/ProfileAvatar.svelte';
   import SideBar from '../components/SideBar.svelte';
   import CharmMenuHamburger from '~icons/charm/menu-hamburger';
@@ -22,7 +22,9 @@
 
 <Modal />
 
-<Drawer>
+<Toast position="tr" />
+
+<Drawer width="w-[75%]">
   <SideBar />
 </Drawer>
 
@@ -30,7 +32,7 @@
   <svelte:fragment slot="header">
     <AppBar gap="gap-0" slotLead="md:hidden" slotTrail="place-content-end">
       <svelte:fragment slot="lead">
-        <button on:click={() => drawerStore.open({ width: 'w-[75%]' })} class="btn-icon">
+        <button on:click={() => drawerStore.open()} class="btn-icon">
           <CharmMenuHamburger />
         </button>
       </svelte:fragment>
