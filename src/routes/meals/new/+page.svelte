@@ -3,20 +3,34 @@
   import MaterialSymbolsArrowBackIos from '~icons/material-symbols/arrow-back-ios';
   import UilImageUpload from '~icons/uil/image-upload';
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
+  import { MealCalculatedAs, type Meal } from '../../../types/Meal';
+  import { fileToBase64 } from '../../../utils/ImageProcess';
 
-  let value = 0;
   let imagePreview = '';
   let imageUrlInput: HTMLInputElement;
 
-  function imageUpload(event: Event) {
+  let model = {
+    calculatedAs: MealCalculatedAs.PerProduct,
+    createdAtTimestamp: Date.now(),
+  } as Meal;
+
+  async function imageUpload(event: Event) {
     const target = event.target as HTMLInputElement;
     const file = target.files![0];
 
-    imagePreview = file ? URL.createObjectURL(file) : '';
+    imagePreview = await fileToBase64(file);
   }
 
   function imageUrl() {
     imagePreview = imageUrlInput.value && imageUrlInput.validity.valid ? imageUrlInput.value : '';
+  }
+
+  function addMeal() {
+    if (imagePreview) {
+      model.imageUrl = imagePreview;
+    }
+
+    console.log(model);
   }
 </script>
 
@@ -27,15 +41,15 @@
 
 <h1 class="text-2xl mb-8">Add new meal for later use</h1>
 
-<form class="space-y-6">
+<form on:submit|preventDefault={addMeal} class="space-y-6">
   <label class="label">
     <span>Name</span>
-    <input class="input variant-form-material" type="text" />
+    <input bind:value={model.name} class="input variant-form-material" type="text" required />
   </label>
 
   <label class="label">
     <span>Description</span>
-    <textarea class="textarea variant-form-material" rows="4" />
+    <textarea bind:value={model.description} class="textarea variant-form-material" rows="4" required />
   </label>
 
   <div class="grid gap-6 grid-cols-1 sm:grid-cols-[auto_1fr]">
@@ -47,16 +61,25 @@
           active="variant-filled-surface"
           hover="hover:variant-soft-surface"
         >
-          <RadioItem bind:group={value} name="justify" value={0}>Per product</RadioItem>
-          <RadioItem bind:group={value} name="justify" value={1}>Per grams</RadioItem>
+          <RadioItem
+            on:click={() => delete model.grams}
+            bind:group={model.calculatedAs}
+            name="per-product"
+            value={MealCalculatedAs.PerProduct}
+          >
+            Per product
+          </RadioItem>
+          <RadioItem bind:group={model.calculatedAs} name="per-grams" value={MealCalculatedAs.PerGrams}>
+            Per grams
+          </RadioItem>
         </RadioGroup>
       </div>
     </div>
 
-    {#if value === 1}
+    {#if model.calculatedAs === MealCalculatedAs.PerGrams}
       <label class="label sm:mt-1">
         <span>Grams</span>
-        <input class="input variant-form-material" type="number" />
+        <input bind:value={model.grams} class="input variant-form-material" type="number" required />
       </label>
     {/if}
   </div>
@@ -64,22 +87,22 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-2">
     <label class="label">
       <span>Calories</span>
-      <input class="input variant-form-material" type="number" />
+      <input bind:value={model.calories} class="input variant-form-material" type="number" required />
     </label>
 
     <label class="label">
       <span>Protein</span>
-      <input class="input variant-form-material" type="number" />
+      <input bind:value={model.protein} class="input variant-form-material" type="number" required />
     </label>
 
     <label class="label">
       <span>Carbs</span>
-      <input class="input variant-form-material" type="number" />
+      <input bind:value={model.carbs} class="input variant-form-material" type="number" required />
     </label>
 
     <label class="label">
       <span>Fat</span>
-      <input class="input variant-form-material" type="number" />
+      <input bind:value={model.fat} class="input variant-form-material" type="number" required />
     </label>
   </div>
 
@@ -110,10 +133,13 @@
 
       <div class="label xl:mb-6">
         <span>Image URL</span>
-        <div class="input-group input-group-divider variant-form-material grid-cols-[1fr_auto]">
+        <form
+          on:submit|preventDefault={imageUrl}
+          class="input-group input-group-divider variant-form-material grid-cols-[1fr_auto]"
+        >
           <input bind:this={imageUrlInput} type="url" />
-          <button on:click={imageUrl} class="variant-soft-secondary">Preview</button>
-        </div>
+          <button type="submit" class="variant-soft-secondary">Preview</button>
+        </form>
       </div>
     </div>
   {/if}
