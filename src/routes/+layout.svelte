@@ -3,13 +3,18 @@
   import '@skeletonlabs/skeleton/themes/theme-skeleton.css';
   import '@skeletonlabs/skeleton/styles/skeleton.css';
   import '../app.css';
-  import { AppShell, AppBar, Modal, Drawer, drawerStore, Toast } from '@skeletonlabs/skeleton';
+  import { AppShell, AppBar, Modal, Drawer, drawerStore, Toast, setInitialClassState } from '@skeletonlabs/skeleton';
   import ProfileAvatar from '../components/ProfileAvatar.svelte';
   import SideBar from '../components/SideBar.svelte';
   import CharmMenuHamburger from '~icons/charm/menu-hamburger';
   import { modeCurrent } from '@skeletonlabs/skeleton';
+  import { onMount } from 'svelte';
 
   $: positionClasses = $drawerStore.open ? 'translate-x-[75%]' : '';
+
+  onMount(() => {
+    setInitialClassState();
+  });
 </script>
 
 <svelte:head>

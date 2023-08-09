@@ -4,42 +4,37 @@
   import UilImageUpload from '~icons/uil/image-upload';
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import { MealCalculatedAs, type Meal } from '../../../types/Meal';
-  import { fileToBase64 } from '../../../utils/ImageProcess';
+  import { imageToBase64AndResize } from '../../../utils/ImageProcess';
   import { storeMeals } from '../../../utils/LocalStorage';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
 
-  // export let data;
+  export let data;
 
-  // const mealId = data.id;
+  const mealId = data.id;
 
-  let mealId: string;
+  const model = $storeMeals.find((meal) => meal.id === mealId) || ({} as Meal);
 
-  // const model = $storeMeals.find((meal) => meal.id === mealId) || ({} as Meal);
-
-  // const initialName = model.name;
-  // let imagePreview = model.imageUrl || '';
-  let model = {} as Meal;
-
-  let initialName: string;
-  let imagePreview: string;
+  const initialName = model.name;
+  let imagePreview = model.imageUrl || '';
   let imageUrlInput: HTMLInputElement;
 
   async function imageUpload(event: Event) {
     const target = event.target as HTMLInputElement;
     const file = target.files![0];
 
-    imagePreview = await fileToBase64(file);
+    imagePreview = await imageToBase64AndResize(file, 560, 240);
   }
 
   onMount(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    mealId = urlParams.get('id') as string;
+    if (!$storeMeals.find((meal) => meal.id === mealId)) {
+      toastStore.trigger({
+        message: `Meal was not found for editing`,
+        background: 'variant-soft-error',
+      });
 
-    model = $storeMeals.find((meal) => meal.id === mealId) || ({} as Meal);
-
-    initialName = model.name;
-    imagePreview = model.imageUrl || '';
+      goto('/meals');
+    }
   });
 
   function imageUrl() {
