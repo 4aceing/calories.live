@@ -1,27 +1,18 @@
 <script lang="ts">
-  import { FileDropzone, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+  import { FileDropzone, RadioGroup, RadioItem, toastStore } from '@skeletonlabs/skeleton';
   import MaterialSymbolsArrowBackIos from '~icons/material-symbols/arrow-back-ios';
   import UilImageUpload from '~icons/uil/image-upload';
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import { MealCalculatedAs, type Meal } from '../../../types/Meal';
   import { fileToBase64 } from '../../../utils/ImageProcess';
+  import { storeMeals } from '../../../utils/LocalStorage';
+  import { goto } from '$app/navigation';
 
   export let data;
 
   const mealId = data.id;
 
-  let model = {
-    calculatedAs: MealCalculatedAs.PerProduct,
-    name: 'egg',
-    description: 'egg',
-    calories: 1,
-    protein: 2,
-    carbs: 3,
-    fat: 4,
-    imageUrl:
-      'https://kmph.com/resources/media2/16x9/full/1015/center/80/6b7a7c7c-3c44-489c-9880-4a17508cdc6d-large16x9_Postworkout_meal.jpg',
-    createdAtTimestamp: Date.now(),
-  } as Meal;
+  const model = $storeMeals.find((meal) => meal.id === mealId) || ({} as Meal);
 
   const initialName = model.name;
   let imagePreview = model.imageUrl || '';
@@ -39,13 +30,36 @@
   }
 
   function editMeal() {
-    if (imagePreview) {
-      model.imageUrl = imagePreview;
+    if ($storeMeals.find((meal) => meal.id !== mealId && meal.name === model.name)) {
+      toastStore.trigger({
+        message: `A meal named '${model.name}' already exists`,
+        background: 'variant-soft-error',
+      });
+
+      return;
     }
+
+    model.imageUrl = imagePreview;
 
     model.updatedAtTimestamp = Date.now();
 
-    console.log(model);
+    model.protein = +parseFloat(`${model.protein}`).toFixed(2);
+    model.carbs = +parseFloat(`${model.carbs}`).toFixed(2);
+    model.fat = +parseFloat(`${model.fat}`).toFixed(2);
+    model.calculatedCalories = model.protein * 4 + model.carbs * 4 + model.fat * 9;
+
+    storeMeals.update((meals) => {
+      const index = meals.findIndex((meal) => meal.id === mealId);
+      meals.splice(index, 1, model);
+      return meals;
+    });
+
+    toastStore.trigger({
+      message: `Meal '${model.name}' was edited`,
+      background: 'variant-soft-success',
+    });
+
+    goto('/meals');
   }
 </script>
 

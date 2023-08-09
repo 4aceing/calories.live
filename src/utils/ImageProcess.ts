@@ -10,18 +10,28 @@ export function fileToBase64(file: File) {
   });
 }
 
-export function resizeImage(file: File, width: number, height: number) {
-  const fileReader = new FileReader();
-  fileReader.readAsDataURL(file);
-  fileReader.onload = () => {
-    const img = document.createElement('img');
-    img.src = fileReader.result as string;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-      ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL(file.type);
-      console.log(dataUrl);
+export function imageToBase64AndResize(file: File, width: number, height: number) {
+  return new Promise<string>((resolve) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+
+    fileReader.onload = () => {
+      const img = document.createElement('img');
+      img.src = fileReader.result as string;
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+        context.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL(file.type);
+        resolve(dataUrl);
+      };
+
+      img.onerror = () => resolve('');
     };
-  };
+
+    fileReader.onerror = () => resolve('');
+  });
 }

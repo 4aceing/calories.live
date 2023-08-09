@@ -1,9 +1,11 @@
 export type Meal = {
+  id: string;
   name: string;
   description: string;
   calculatedAs: MealCalculatedAs;
   grams?: number;
   calories: number;
+  calculatedCalories: number;
   protein: number;
   carbs: number;
   fat: number;

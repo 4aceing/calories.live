@@ -1,44 +1,24 @@
 <script lang="ts">
   import { toastStore } from '@skeletonlabs/skeleton';
   import MealCardActions from '../../components/MealCardActions.svelte';
-
-  let meals = [
-    {
-      id: 1,
-      name: 'egg',
-      description: 'fried chicken egg',
-      quantifier: 1,
-      kcal: 90,
-      protein: 6.25,
-      fats: 6.75,
-      carbs: 0.5,
-    },
-    {
-      id: 2,
-      name: 'milk',
-      description: '333ml zuzu 1.5% fat',
-      quantifier: 333,
-      kcal: 147,
-      protein: 10.32,
-      fats: 5,
-      carbs: 15,
-    },
-  ];
-  meals.push(...meals);
-  meals.push(...meals);
-  meals.push(...meals);
+  import { storeMeals } from '../../utils/LocalStorage';
+  import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
+  import { MealCalculatedAs } from '../../types/Meal';
 
   let searchValue = '';
 
-  $: filteredMeals = meals.filter((meal) => meal.name.includes(searchValue) || meal.description.includes(searchValue));
+  $: filteredMeals = $storeMeals.filter(
+    (meal) => meal.name.includes(searchValue) || meal.description.includes(searchValue),
+  );
 
   function deleteMeal(meal: any, index: number) {
-    meals.splice(index, 1);
-
-    meals = [...meals];
+    storeMeals.update((meals) => {
+      meals.splice(index, 1);
+      return meals;
+    });
 
     toastStore.trigger({
-      message: `Meal '${meal.name}' was deleted`,
+      message: `Meal '${meal.name}' was deleted from your list`,
       background: 'variant-soft-warning',
     });
   }
@@ -58,26 +38,37 @@
         <MealCardActions {meal} on:delete={() => deleteMeal(meal, index)} />
       </div>
 
-      <header class="aspect-[21/9] overflow-hidden">
-        <img
-          loading="lazy"
-          src="https://kmph.com/resources/media2/16x9/full/1015/center/80/6b7a7c7c-3c44-489c-9880-4a17508cdc6d-large16x9_Postworkout_meal.jpg"
-          class="bg-black/50 w-full"
-          alt="Image {meal.name}"
-        />
+      <header
+        class="aspect-[21/9] overflow-hidden bg-surface/50 {meal.imageUrl ? '' : 'flex items-center justify-center'}"
+      >
+        {#if meal.imageUrl}
+          <img loading="lazy" src={meal.imageUrl} class="w-full" alt={meal.name} />
+        {:else}
+          <IconParkOutlineDisabledPicture class="text-4xl opacity-50" />
+        {/if}
       </header>
+
+      <hr class="opacity-50" />
 
       <div class="p-4 space-y-4">
         <h3 class="h3">{meal.name}</h3>
 
         <article>
-          <p>{meal.description}</p>
+          <p class="max-h-52 overflow-y-auto">{meal.description}</p>
 
           <section class="mt-4">
-            <div>Calories: {meal.kcal}</div>
+            <div class="mb-2">
+              {meal.calculatedAs === MealCalculatedAs.PerProduct ? 'Per product' : `Per ${meal.grams}g`}
+            </div>
+            <div class="flex items-center gap-2">
+              Calories: {Math.ceil(meal.calories)}
+              <span class="text-sm opacity-75" title="Calculated calories">
+                ({Math.ceil(meal.calculatedCalories)})
+              </span>
+            </div>
             <div>Protein: {meal.protein}</div>
             <div>Carbs: {meal.carbs}</div>
-            <div>Fat: {meal.fats}</div>
+            <div>Fat: {meal.fat}</div>
           </section>
         </article>
       </div>
@@ -85,7 +76,7 @@
       <hr class="opacity-50 mt-auto" />
 
       <footer class="p-4 flex justify-end items-center space-x-4">
-        <small>Added on {new Date().toLocaleDateString()}</small>
+        <small>Added on {new Date(meal.createdAtTimestamp).toLocaleDateString()}</small>
       </footer>
     </div>
   {:else}

@@ -1,15 +1,18 @@
 <script lang="ts">
-  import { FileDropzone, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+  import { FileDropzone, RadioGroup, RadioItem, toastStore } from '@skeletonlabs/skeleton';
   import MaterialSymbolsArrowBackIos from '~icons/material-symbols/arrow-back-ios';
   import UilImageUpload from '~icons/uil/image-upload';
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import { MealCalculatedAs, type Meal } from '../../../types/Meal';
-  import { fileToBase64 } from '../../../utils/ImageProcess';
+  import { imageToBase64AndResize } from '../../../utils/ImageProcess';
+  import { storeMeals } from '../../../utils/LocalStorage';
+  import { goto } from '$app/navigation';
 
   let imagePreview = '';
   let imageUrlInput: HTMLInputElement;
 
   let model = {
+    id: `${Date.now()}`,
     calculatedAs: MealCalculatedAs.PerProduct,
     createdAtTimestamp: Date.now(),
   } as Meal;
@@ -18,7 +21,7 @@
     const target = event.target as HTMLInputElement;
     const file = target.files![0];
 
-    imagePreview = await fileToBase64(file);
+    imagePreview = await imageToBase64AndResize(file, 560, 240);
   }
 
   function imageUrl() {
@@ -30,7 +33,22 @@
       model.imageUrl = imagePreview;
     }
 
-    console.log(model);
+    model.protein = +parseFloat(`${model.protein}`).toFixed(2);
+    model.carbs = +parseFloat(`${model.carbs}`).toFixed(2);
+    model.fat = +parseFloat(`${model.fat}`).toFixed(2);
+    model.calculatedCalories = model.protein * 4 + model.carbs * 4 + model.fat * 9;
+
+    storeMeals.update((meals) => {
+      meals.push(model);
+      return meals;
+    });
+
+    toastStore.trigger({
+      message: `Meal '${model.name}' was added to your list`,
+      background: 'variant-soft-success',
+    });
+
+    goto('/meals');
   }
 </script>
 
@@ -87,22 +105,22 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-2">
     <label class="label">
       <span>Calories</span>
-      <input bind:value={model.calories} class="input variant-form-material" type="number" required />
+      <input bind:value={model.calories} class="input variant-form-material" type="number" required step="any" />
     </label>
 
     <label class="label">
       <span>Protein</span>
-      <input bind:value={model.protein} class="input variant-form-material" type="number" required />
+      <input bind:value={model.protein} class="input variant-form-material" type="number" required step="any" />
     </label>
 
     <label class="label">
       <span>Carbs</span>
-      <input bind:value={model.carbs} class="input variant-form-material" type="number" required />
+      <input bind:value={model.carbs} class="input variant-form-material" type="number" required step="any" />
     </label>
 
     <label class="label">
       <span>Fat</span>
-      <input bind:value={model.fat} class="input variant-form-material" type="number" required />
+      <input bind:value={model.fat} class="input variant-form-material" type="number" required step="any" />
     </label>
   </div>
 
