@@ -33,7 +33,7 @@
 <div class="card w-auto shadow-xl p-2 z-10" data-popup={popupSettings.target}>
   <ul class="list">
     <li>
-      <a href="/meals/{meal.id}" class="btn btn-sm w-full justify-start">Edit</a>
+      <a href="/meals/edit?id={meal.id}" class="btn btn-sm w-full justify-start">Edit</a>
     </li>
     <hr class="opacity-50" />
     <li>

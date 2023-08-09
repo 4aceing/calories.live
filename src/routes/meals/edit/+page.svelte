@@ -7,15 +7,22 @@
   import { fileToBase64 } from '../../../utils/ImageProcess';
   import { storeMeals } from '../../../utils/LocalStorage';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
 
-  export let data;
+  // export let data;
 
-  const mealId = data.id;
+  // const mealId = data.id;
 
-  const model = $storeMeals.find((meal) => meal.id === mealId) || ({} as Meal);
+  let mealId: string;
 
-  const initialName = model.name;
-  let imagePreview = model.imageUrl || '';
+  // const model = $storeMeals.find((meal) => meal.id === mealId) || ({} as Meal);
+
+  // const initialName = model.name;
+  // let imagePreview = model.imageUrl || '';
+  let model = {} as Meal;
+
+  let initialName: string;
+  let imagePreview: string;
   let imageUrlInput: HTMLInputElement;
 
   async function imageUpload(event: Event) {
@@ -24,6 +31,16 @@
 
     imagePreview = await fileToBase64(file);
   }
+
+  onMount(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    mealId = urlParams.get('id') as string;
+
+    model = $storeMeals.find((meal) => meal.id === mealId) || ({} as Meal);
+
+    initialName = model.name;
+    imagePreview = model.imageUrl || '';
+  });
 
   function imageUrl() {
     imagePreview = imageUrlInput.value && imageUrlInput.validity.valid ? imageUrlInput.value : '';
