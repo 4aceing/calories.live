@@ -5,7 +5,9 @@
   import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
   import { MealCalculatedAs } from '../../types/Meal';
 
-  let searchValue = '';
+  export let data;
+
+  let searchValue = data.search || '';
 
   $: filteredMeals = $storeMeals.filter(
     (meal) => meal.name.includes(searchValue) || meal.description.includes(searchValue),
