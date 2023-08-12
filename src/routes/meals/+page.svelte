@@ -1,9 +1,9 @@
 <script lang="ts">
   import { toastStore } from '@skeletonlabs/skeleton';
   import MealCardActions from '../../components/MealCardActions.svelte';
-  import { storeMeals } from '../../utils/LocalStorage';
+  import { storeMeals, storeTodayMeals } from '../../utils/LocalStorage';
   import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
-  import { MealCalculatedAs } from '../../types/Meal';
+  import { MealCalculatedAs, type Meal } from '../../types/Meal';
 
   export let data;
 
@@ -13,7 +13,7 @@
     (meal) => meal.name.includes(searchValue) || meal.description.includes(searchValue),
   );
 
-  function deleteMeal(meal: any, index: number) {
+  function deleteMeal(meal: Meal, index: number) {
     storeMeals.update((meals) => {
       meals.splice(index, 1);
       return meals;
@@ -23,10 +23,25 @@
       message: `Meal '${meal.name}' was deleted from your list`,
       background: 'variant-soft-warning',
     });
+
+    if ($storeTodayMeals.find((m) => m.mealId === meal.id)) {
+      storeTodayMeals.update((meals) => {
+        meals.splice(
+          meals.findIndex((m) => m.mealId === meal.id),
+          1,
+        );
+        return meals;
+      });
+
+      toastStore.trigger({
+        message: `Excluded '${meal.name}' from today's list of meals`,
+        background: 'variant-soft-warning',
+      });
+    }
   }
 </script>
 
-<h1 class="text-2xl mb-8">Here you can find all of your saved meals</h1>
+<h1 class="text-2xl mb-8">Find all of your saved meals</h1>
 
 <div class="grid sm:grid-cols-[1fr_auto] gap-4 mb-8">
   <input bind:value={searchValue} type="search" class="input" placeholder="Search..." />

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Autocomplete, popup, type AutocompleteOption, type PopupSettings, toastStore } from '@skeletonlabs/skeleton';
-  import { storeMeals, storeTodayMeals } from '../../utils/LocalStorage';
+  import { storeMeals, storeProgress, storeTodayMeals } from '../../utils/LocalStorage';
   import { MealCalculatedAs, type Meal, type TodayMeal } from '../../types/Meal';
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
@@ -120,8 +120,27 @@
     });
   }
 
-  function trackDay() {
-    console.log(trackDate);
+  function finishDay() {
+    storeProgress.update((days) => {
+      days.push({
+        day: trackDate,
+        meals: meals.map((m) => ({
+          id: m.id,
+          quantity: m.quantity,
+        })),
+      });
+      days.sort((a, b) => (a.day < b.day ? 1 : 0));
+      return days;
+    });
+
+    storeTodayMeals.set([]);
+
+    toastStore.trigger({
+      message: `This day was saved`,
+      background: 'variant-soft-success',
+    });
+
+    goto(`/progress/day?date=${trackDate}`);
   }
 </script>
 
@@ -292,7 +311,5 @@
     <input type="date" class="input variant-form-material" bind:value={trackDate} />
   </label>
 
-  <button on:click={trackDay} type="button" class="btn variant-ghost-primary max-sm:w-full mt-6 whitespace-normal">
-    Finish day and save into history
-  </button>
+  <button on:click={finishDay} type="button" class="btn variant-ghost-primary max-sm:w-full mt-6">Finish day</button>
 {/if}

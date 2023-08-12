@@ -12,7 +12,7 @@ export interface Meal {
   imageUrl?: string;
   createdAtTimestamp: number;
   updatedAtTimestamp?: number;
-};
+}
 
 export interface TodayMeal extends Meal {
   quantity: number;

@@ -17,7 +17,9 @@
   const modalConfirmDelete: ModalSettings = {
     type: 'confirm',
     title: 'Please Confirm',
-    body: `Are you sure you want to delete this meal '${meal.name}'?`,
+    body: `<p>Are you sure you want to delete this meal '${meal.name}'?</p>
+           <p>If this meal is included into today's list, it will be removed</p>
+           <p>Any tracked history for this meal will be preserved</p>`,
     response: (result: boolean) => {
       if (result) {
         dispatch('delete', meal);

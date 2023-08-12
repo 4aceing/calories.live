@@ -7,12 +7,13 @@
   import { imageToBase64AndResize } from '../../../utils/ImageProcess';
   import { storeMeals } from '../../../utils/LocalStorage';
   import { goto } from '$app/navigation';
+  import { v4 as uuidv4 } from 'uuid';
 
   let imagePreview = '';
   let imageUrlInput: HTMLInputElement;
 
   let model = {
-    id: `${Date.now()}`,
+    id: uuidv4(),
     calculatedAs: MealCalculatedAs.PerProduct,
     createdAtTimestamp: Date.now(),
   } as Meal;

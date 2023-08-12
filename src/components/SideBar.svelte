@@ -16,7 +16,7 @@
         <a on:click={closeDrawer} href="/today">Today's Meals</a>
       </li>
       <li>
-        <a on:click={closeDrawer} href="/history">History</a>
+        <a on:click={closeDrawer} href="/progress">Progress</a>
       </li>
       <li>
         <a on:click={closeDrawer} href="/about">About</a>
