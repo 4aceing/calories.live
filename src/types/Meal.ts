@@ -1,4 +1,4 @@
-export type Meal = {
+export interface Meal {
   id: string;
   name: string;
   description: string;
@@ -13,6 +13,14 @@ export type Meal = {
   createdAtTimestamp: number;
   updatedAtTimestamp?: number;
 };
+
+export interface TodayMeal extends Meal {
+  quantity: number;
+  computedCalories: number;
+  computedProtein: number;
+  computedCarbs: number;
+  computedFat: number;
+}
 
 export enum MealCalculatedAs {
   PerProduct,

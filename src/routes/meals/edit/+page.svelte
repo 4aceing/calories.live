@@ -124,7 +124,7 @@
     {#if model.calculatedAs === MealCalculatedAs.PerGrams}
       <label class="label sm:mt-1">
         <span>Grams</span>
-        <input bind:value={model.grams} class="input variant-form-material" type="number" required />
+        <input bind:value={model.grams} class="input variant-form-material" type="number" required step="any" />
       </label>
     {/if}
   </div>
@@ -132,22 +132,22 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-2">
     <label class="label">
       <span>Calories</span>
-      <input bind:value={model.calories} class="input variant-form-material" type="number" required />
+      <input bind:value={model.calories} class="input variant-form-material" type="number" required step="any" />
     </label>
 
     <label class="label">
       <span>Protein</span>
-      <input bind:value={model.protein} class="input variant-form-material" type="number" required />
+      <input bind:value={model.protein} class="input variant-form-material" type="number" required step="any" />
     </label>
 
     <label class="label">
       <span>Carbs</span>
-      <input bind:value={model.carbs} class="input variant-form-material" type="number" required />
+      <input bind:value={model.carbs} class="input variant-form-material" type="number" required step="any" />
     </label>
 
     <label class="label">
       <span>Fat</span>
-      <input bind:value={model.fat} class="input variant-form-material" type="number" required />
+      <input bind:value={model.fat} class="input variant-form-material" type="number" required step="any" />
     </label>
   </div>
 

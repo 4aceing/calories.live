@@ -53,7 +53,7 @@
       <hr class="opacity-50" />
 
       <div class="p-4 space-y-4">
-        <h3 class="h3">{meal.name}</h3>
+        <h3 class="h3 max-h-40 overflow-y-auto">{meal.name}</h3>
 
         <article>
           <p class="max-h-52 overflow-y-auto">{meal.description}</p>
@@ -64,9 +64,9 @@
             </div>
             <div class="flex items-center gap-2">
               Calories: {Math.ceil(meal.calories)}
-              <span class="text-sm opacity-75" title="Calculated calories">
+              <!-- <span class="text-sm opacity-75" title="Calculated calories">
                 ({Math.ceil(meal.calculatedCalories)})
-              </span>
+              </span> -->
             </div>
             <div>Protein: {meal.protein}</div>
             <div>Carbs: {meal.carbs}</div>

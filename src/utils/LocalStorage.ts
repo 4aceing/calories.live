@@ -4,4 +4,4 @@ import type { Meal } from '../types/Meal';
 
 export const storeMeals: Writable<Meal[]> = localStorageStore('meals', []);
 
-export const storeTodayMeals: Writable<Meal[]> = localStorageStore('todayMeals', []);
+export const storeTodayMeals: Writable<{ mealId: string; quantity: number }[]> = localStorageStore('todayMeals', []);
