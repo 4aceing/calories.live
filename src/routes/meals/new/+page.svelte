@@ -5,9 +5,9 @@
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import { MealCalculatedAs, type Meal } from '../../../types/Meal';
   import { imageToBase64AndResize } from '../../../utils/ImageProcess';
-  import { storeMeals } from '../../../utils/LocalStorage';
   import { goto } from '$app/navigation';
   import { v4 as uuidv4 } from 'uuid';
+  import { addStoredMeal, mealsStore } from '../../../utils/stores/MealsStore';
 
   let imagePreview = '';
   let imageUrlInput: HTMLInputElement;
@@ -30,24 +30,9 @@
   }
 
   function addMeal() {
-    if (imagePreview) {
-      model.imageUrl = imagePreview;
-    }
+    model.imageUrl = imagePreview || undefined;
 
-    model.protein = +parseFloat(`${model.protein}`).toFixed(2);
-    model.carbs = +parseFloat(`${model.carbs}`).toFixed(2);
-    model.fat = +parseFloat(`${model.fat}`).toFixed(2);
-    model.calculatedCalories = model.protein * 4 + model.carbs * 4 + model.fat * 9;
-
-    storeMeals.update((meals) => {
-      meals.push(model);
-      return meals;
-    });
-
-    toastStore.trigger({
-      message: `Meal '${model.name}' was added to your list`,
-      background: 'variant-soft-success',
-    });
+    addStoredMeal(model);
 
     goto('/meals');
   }
@@ -106,7 +91,7 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-2">
     <label class="label">
       <span>Calories</span>
-      <input bind:value={model.calories} class="input variant-form-material" type="number" required step="any" />
+      <input bind:value={model.calories} class="input variant-form-material" type="number" required />
     </label>
 
     <label class="label">

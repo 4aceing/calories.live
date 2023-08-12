@@ -1,44 +1,16 @@
 <script lang="ts">
-  import { toastStore } from '@skeletonlabs/skeleton';
   import MealCardActions from '../../components/MealCardActions.svelte';
-  import { storeMeals, storeTodayMeals } from '../../utils/LocalStorage';
   import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
-  import { MealCalculatedAs, type Meal } from '../../types/Meal';
+  import { MealCalculatedAs } from '../../types/Meal';
+  import { deleteStoredMeal, mealsStore } from '../../utils/stores/MealsStore';
 
   export let data;
 
   let searchValue = data.search || '';
 
-  $: filteredMeals = $storeMeals.filter(
+  $: filteredMeals = $mealsStore.filter(
     (meal) => meal.name.includes(searchValue) || meal.description.includes(searchValue),
   );
-
-  function deleteMeal(meal: Meal, index: number) {
-    storeMeals.update((meals) => {
-      meals.splice(index, 1);
-      return meals;
-    });
-
-    toastStore.trigger({
-      message: `Meal '${meal.name}' was deleted from your list`,
-      background: 'variant-soft-warning',
-    });
-
-    if ($storeTodayMeals.find((m) => m.mealId === meal.id)) {
-      storeTodayMeals.update((meals) => {
-        meals.splice(
-          meals.findIndex((m) => m.mealId === meal.id),
-          1,
-        );
-        return meals;
-      });
-
-      toastStore.trigger({
-        message: `Excluded '${meal.name}' from today's list of meals`,
-        background: 'variant-soft-warning',
-      });
-    }
-  }
 </script>
 
 <h1 class="text-2xl mb-8">Find all of your saved meals</h1>
@@ -49,10 +21,10 @@
 </div>
 
 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-  {#each filteredMeals as meal, index}
+  {#each filteredMeals as meal}
     <div class="card overflow-hidden flex flex-col relative">
       <div class="absolute top-1 right-1">
-        <MealCardActions {meal} on:delete={() => deleteMeal(meal, index)} />
+        <MealCardActions {meal} on:delete={() => deleteStoredMeal(meal.id)} />
       </div>
 
       <header

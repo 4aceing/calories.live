@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { storeProgress } from '../../utils/LocalStorage';
+  import { progressStore } from '../../utils/stores/ProgressStore';
 
   const average = {
     calories: 100,
@@ -11,7 +11,7 @@
 
 <h1 class="text-2xl mb-8">View your progress</h1>
 
-{#if $storeProgress.length}
+{#if $progressStore.length}
   <div class="space-y-2 mb-8">
     <span class="text-lg">Average values</span>
     <div class="w-full grid grid-cols-1 min-[500px]:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-2 items-center mb-2">
@@ -47,8 +47,8 @@
 {/if}
 
 <div class="flex flex-wrap items-center gap-4">
-  {#each $storeProgress as day}
-    <a href="/progress/day?date={day.day}" class="btn variant-filled-surface">{day.day}</a>
+  {#each $progressStore as day}
+    <a href="/progress/day?date={day.date}" class="btn variant-filled-surface">{day.date}</a>
   {:else}
     <p>No days saved</p>
   {/each}

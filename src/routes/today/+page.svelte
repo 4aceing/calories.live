@@ -1,39 +1,47 @@
 <script lang="ts">
-  import { Autocomplete, popup, type AutocompleteOption, type PopupSettings, toastStore } from '@skeletonlabs/skeleton';
-  import { storeMeals, storeProgress, storeTodayMeals } from '../../utils/LocalStorage';
-  import { MealCalculatedAs, type Meal, type TodayMeal } from '../../types/Meal';
+  import { Autocomplete, popup, type AutocompleteOption, type PopupSettings } from '@skeletonlabs/skeleton';
+  import { MealCalculatedAs, type Meal } from '../../types/Meal';
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
   import MdiEyeArrowLeftOutline from '~icons/mdi/eye-arrow-left-outline';
   import { goto } from '$app/navigation';
+  import type { TodayMeal } from '../../types/TodayMeal';
+  import {
+    addStoredTodayMeal,
+    deleteStoredTodayMeal,
+    finishStoredTodayMeal,
+    todayMealsStore,
+    updateStoredTodayMealQuantity,
+  } from '../../utils/stores/TodayMealsStore';
+  import { getStoredMealById, mealsStore } from '../../utils/stores/MealsStore';
 
-  $: meals = $storeTodayMeals.map((today) => {
-    const found = $storeMeals.find((meal) => meal.id === today.mealId) as TodayMeal;
+  $: todayMeals = $todayMealsStore.map((todayMeal) => {
+    const meal = getStoredMealById(todayMeal.id) as TodayMeal;
 
-    found.quantity = today.quantity;
-    found.computedCalories = found.calories;
-    found.computedProtein = found.protein;
-    found.computedCarbs = found.carbs;
-    found.computedFat = found.fat;
+    meal.quantity = todayMeal.quantity;
+    meal.computedCalories = meal.calories;
+    meal.computedProtein = meal.protein;
+    meal.computedCarbs = meal.carbs;
+    meal.computedFat = meal.fat;
 
-    return found;
+    return meal;
   });
 
-  $: meals.forEach((meal) => {
+  $: todayMeals.forEach((meal) => {
     meal.computedCalories = +parseFloat(`${(meal.quantity / (meal.grams || 1)) * meal.calories}`).toFixed(2);
     meal.computedProtein = +parseFloat(`${(meal.quantity / (meal.grams || 1)) * meal.protein}`).toFixed(2);
     meal.computedCarbs = +parseFloat(`${(meal.quantity / (meal.grams || 1)) * meal.carbs}`).toFixed(2);
     meal.computedFat = +parseFloat(`${(meal.quantity / (meal.grams || 1)) * meal.fat}`).toFixed(2);
   });
 
-  $: total = meals.reduce(
+  $: total = todayMeals.reduce(
     (data, meal, i) => {
       data.calories += meal.computedCalories;
       data.protein += meal.computedProtein;
       data.carbs += meal.computedCarbs;
       data.fat += meal.computedFat;
 
-      if (i === meals.length - 1) {
+      if (i === todayMeals.length - 1) {
         data.calories = +parseFloat(`${data.calories}`).toFixed(2);
         data.protein = +parseFloat(`${data.protein}`).toFixed(2);
         data.carbs = +parseFloat(`${data.carbs}`).toFixed(2);
@@ -53,7 +61,7 @@
   let trackDate = new Date().toISOString().slice(0, 10);
   let inputSearch: string = '';
 
-  let searchMeals = $storeMeals.map(
+  let searchMeals = $mealsStore.map(
     (meal) =>
       ({
         label: meal.name,
@@ -70,75 +78,19 @@
   function includeMeal(event: CustomEvent<AutocompleteOption>) {
     const meal = event.detail.value as Meal;
 
-    if (meals.find((m) => m.id === meal.id)) {
-      toastStore.trigger({
-        message: `Meal '${meal.name}' is already included in today's list`,
-        background: 'variant-soft-error',
-      });
-
-      return;
-    }
-
-    storeTodayMeals.update((meals) => {
-      meals.push({ mealId: meal.id, quantity: meal.grams || 1 });
-      return meals;
-    });
-
-    toastStore.trigger({
-      message: `Included '${meal.name}' into today's list of meals`,
-      background: 'variant-soft-success',
-    });
-  }
-
-  function excludeMeal(meal: Meal, index: number) {
-    storeTodayMeals.update((meals) => {
-      meals.splice(index, 1);
-      return meals;
-    });
-
-    toastStore.trigger({
-      message: `Excluded '${meal.name}' from today's list of meals`,
-      background: 'variant-soft-warning',
-    });
-  }
-
-  function viewMeal(meal: Meal) {
-    goto(`/meals?search=${meal.name}`);
+    addStoredTodayMeal(meal);
   }
 
   function updateNutritionalValues(meal: Meal, event: Event) {
     const input = event.target as HTMLInputElement;
 
-    storeTodayMeals.update((todayMeals) => {
-      const today = todayMeals.find((todayMeal) => todayMeal.mealId === meal.id);
+    const quantity = +input.value || 0;
 
-      if (today) {
-        today.quantity = +input.value || 0;
-      }
-
-      return todayMeals;
-    });
+    updateStoredTodayMealQuantity(meal.id, quantity);
   }
 
   function finishDay() {
-    storeProgress.update((days) => {
-      days.push({
-        day: trackDate,
-        meals: meals.map((m) => ({
-          id: m.id,
-          quantity: m.quantity,
-        })),
-      });
-      days.sort((a, b) => (a.day < b.day ? 1 : 0));
-      return days;
-    });
-
-    storeTodayMeals.set([]);
-
-    toastStore.trigger({
-      message: `This day was saved`,
-      background: 'variant-soft-success',
-    });
+    finishStoredTodayMeal(trackDate, todayMeals);
 
     goto(`/progress/day?date=${trackDate}`);
   }
@@ -162,7 +114,7 @@
   </div>
 </div>
 
-{#if meals.length}
+{#if todayMeals.length}
   <div
     class="w-full py-2 px-4 grid grid-cols-1 min-[500px]:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-2 items-center mb-2"
   >
@@ -197,7 +149,7 @@
 {/if}
 
 <section class="flex flex-col gap-4">
-  {#each meals as meal, index}
+  {#each todayMeals as meal, index}
     <div class="card w-full overflow-hidden relative">
       <div class="w-full min-h-[5rem] grid grid-cols-1 xl:grid-cols-[1fr_auto_auto] items-center">
         <div class="grid grid-cols-1 min-[500px]:grid-cols-[auto_auto_1fr] min-[500px]:gap-2 items-center">
@@ -251,12 +203,16 @@
           </div>
 
           <div class="flex gap-2 max-[499px]:absolute max-[499px]:top-1 max-[499px]:right-1">
-            <button on:click={() => viewMeal(meal)} class="btn-icon variant-filled-secondary" title="View Meal">
+            <button
+              on:click={() => goto(`/meals?search=${meal.name}`)}
+              class="btn-icon variant-filled-secondary"
+              title="View Meal"
+            >
               <MdiEyeArrowLeftOutline />
             </button>
 
             <button
-              on:click={() => excludeMeal(meal, index)}
+              on:click={() => deleteStoredTodayMeal(meal)}
               class="btn-icon variant-filled-error"
               title="Exclude Meal"
             >
@@ -305,7 +261,7 @@
   {/each}
 </section>
 
-{#if meals.length}
+{#if todayMeals.length}
   <label class="label mt-6">
     <span>Day of tracking (defaults to today)</span>
     <input type="date" class="input variant-form-material" bind:value={trackDate} />

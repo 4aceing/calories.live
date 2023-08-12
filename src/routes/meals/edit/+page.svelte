@@ -5,19 +5,34 @@
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import { MealCalculatedAs, type Meal } from '../../../types/Meal';
   import { imageToBase64AndResize } from '../../../utils/ImageProcess';
-  import { storeMeals } from '../../../utils/LocalStorage';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import { errorToast } from '../../../utils/ToastTrigger';
+  import {
+    getStoredMealById,
+    getStoredMealByName,
+    mealsStore,
+    updateStoredMeal,
+  } from '../../../utils/stores/MealsStore';
 
   export let data;
 
-  const mealId = data.id;
+  const mealId = data.id || '';
 
-  const model = $storeMeals.find((meal) => meal.id === mealId) || ({} as Meal);
+  const model = getStoredMealById(mealId) || ({} as Meal);
 
   const initialName = model.name;
+
   let imagePreview = model.imageUrl || '';
   let imageUrlInput: HTMLInputElement;
+
+  onMount(() => {
+    if (!getStoredMealById(mealId)) {
+      errorToast('Meal was not found for editing');
+
+      goto('/meals');
+    }
+  });
 
   async function imageUpload(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -26,50 +41,20 @@
     imagePreview = await imageToBase64AndResize(file, 560, 240);
   }
 
-  onMount(() => {
-    if (!$storeMeals.find((meal) => meal.id === mealId)) {
-      toastStore.trigger({
-        message: `Meal was not found for editing`,
-        background: 'variant-soft-error',
-      });
-
-      goto('/meals');
-    }
-  });
-
   function imageUrl() {
     imagePreview = imageUrlInput.value && imageUrlInput.validity.valid ? imageUrlInput.value : '';
   }
 
   function editMeal() {
-    if ($storeMeals.find((meal) => meal.id !== mealId && meal.name === model.name)) {
-      toastStore.trigger({
-        message: `A meal named '${model.name}' already exists`,
-        background: 'variant-soft-error',
-      });
+    if (initialName !== model.name && getStoredMealByName(model.name)) {
+      errorToast(`A meal named '${model.name}' already exists`);
 
       return;
     }
 
-    model.imageUrl = imagePreview;
+    model.imageUrl = imagePreview || undefined;
 
-    model.updatedAtTimestamp = Date.now();
-
-    model.protein = +parseFloat(`${model.protein}`).toFixed(2);
-    model.carbs = +parseFloat(`${model.carbs}`).toFixed(2);
-    model.fat = +parseFloat(`${model.fat}`).toFixed(2);
-    model.calculatedCalories = model.protein * 4 + model.carbs * 4 + model.fat * 9;
-
-    storeMeals.update((meals) => {
-      const index = meals.findIndex((meal) => meal.id === mealId);
-      meals.splice(index, 1, model);
-      return meals;
-    });
-
-    toastStore.trigger({
-      message: `Meal '${model.name}' was edited`,
-      background: 'variant-soft-success',
-    });
+    updateStoredMeal(model);
 
     goto('/meals');
   }
@@ -124,7 +109,7 @@
     {#if model.calculatedAs === MealCalculatedAs.PerGrams}
       <label class="label sm:mt-1">
         <span>Grams</span>
-        <input bind:value={model.grams} class="input variant-form-material" type="number" required step="any" />
+        <input bind:value={model.grams} class="input variant-form-material" type="number" required />
       </label>
     {/if}
   </div>
@@ -132,7 +117,7 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-2">
     <label class="label">
       <span>Calories</span>
-      <input bind:value={model.calories} class="input variant-form-material" type="number" required step="any" />
+      <input bind:value={model.calories} class="input variant-form-material" type="number" required />
     </label>
 
     <label class="label">

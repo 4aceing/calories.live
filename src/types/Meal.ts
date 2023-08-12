@@ -14,14 +14,6 @@ export interface Meal {
   updatedAtTimestamp?: number;
 }
 
-export interface TodayMeal extends Meal {
-  quantity: number;
-  computedCalories: number;
-  computedProtein: number;
-  computedCarbs: number;
-  computedFat: number;
-}
-
 export enum MealCalculatedAs {
   PerProduct,
   PerGrams,
