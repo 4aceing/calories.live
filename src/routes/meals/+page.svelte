@@ -8,7 +8,7 @@
 
   let searchValue = data.search || '';
 
-  $: filteredMeals = $mealsStore.filter(
+  $: filteredMeals = $mealsStore.filter(m => !m.archived).filter(
     (meal) => meal.name.includes(searchValue) || meal.description.includes(searchValue),
   );
 </script>

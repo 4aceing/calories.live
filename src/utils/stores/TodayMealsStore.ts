@@ -3,8 +3,8 @@ import { get, type Writable } from 'svelte/store';
 import type { StoredTodayMeal, TodayMeal } from '../../types/TodayMeal';
 import type { Meal } from '../../types/Meal';
 import { errorToast, successToast, warningToast } from '../ToastTrigger';
-import { progressStore } from './ProgressStore';
-import type { TodayMealWithFallback } from '../../types/Progress';
+import { getProgressByDate, progressStore } from './ProgressStore';
+import type { StoredProgress, TodayMealWithFallback } from '../../types/Progress';
 
 export const todayMealsStore: Writable<StoredTodayMeal[]> = localStorageStore('todayMeals', []);
 
@@ -58,21 +58,32 @@ export function deleteStoredTodayMeal(meal: Meal) {
 
 export function finishStoredTodayMeal(date: string, todayMeals: TodayMeal[]) {
   progressStore.update((days) => {
-    days.push({
-      date,
-      meals: todayMeals.map(
+    if (getProgressByDate(date)) {
+      const day = days.find((d) => d.date === date) as StoredProgress;
+      day.meals = todayMeals.map(
         (todayMeal) =>
           ({
             id: todayMeal.id,
             quantity: todayMeal.quantity,
           } as TodayMealWithFallback),
-      ),
-    });
-    days.sort((a, b) => (a.date < b.date ? 1 : -1));
+      );
+    } else {
+      days.push({
+        date,
+        meals: todayMeals.map(
+          (todayMeal) =>
+            ({
+              id: todayMeal.id,
+              quantity: todayMeal.quantity,
+            } as TodayMealWithFallback),
+        ),
+      });
+      days.sort((a, b) => (a.date < b.date ? 1 : -1));
+    }
     return days;
   });
 
   todayMealsStore.set([]);
 
-  successToast('This day was saved');
+  successToast(`Day ${date} was saved`);
 }

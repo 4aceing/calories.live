@@ -12,9 +12,10 @@ export interface Meal {
   imageUrl?: string;
   createdAtTimestamp: number;
   updatedAtTimestamp?: number;
+  archived?: boolean;
 }
 
 export enum MealCalculatedAs {
   PerProduct,
   PerGrams,
-}
+} 

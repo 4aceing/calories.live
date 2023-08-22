@@ -14,6 +14,8 @@
     updateStoredTodayMealQuantity,
   } from '../../utils/stores/TodayMealsStore';
   import { getStoredMealById, mealsStore } from '../../utils/stores/MealsStore';
+  import { confirmModal } from '../../utils/ModalTrigger';
+  import { getProgressByDate } from '../../utils/stores/ProgressStore';
 
   $: todayMeals = $todayMealsStore.map((todayMeal) => {
     const meal = getStoredMealById(todayMeal.id) as TodayMeal;
@@ -61,7 +63,7 @@
   let trackDate = new Date().toISOString().slice(0, 10);
   let inputSearch: string = '';
 
-  let searchMeals = $mealsStore.map(
+  let searchMeals = $mealsStore.filter(m => !m.archived).map(
     (meal) =>
       ({
         label: meal.name,
@@ -90,13 +92,26 @@
   }
 
   function finishDay() {
-    finishStoredTodayMeal(trackDate, todayMeals);
+    const saveDay = () => {
+      finishStoredTodayMeal(trackDate, todayMeals);
 
-    goto(`/progress/day?date=${trackDate}`);
+      goto(`/progress/day?date=${trackDate}`);
+    };
+
+    if (getProgressByDate(trackDate)) {
+      confirmModal(
+        `<p>This day was already tracked</p>
+         <p>Do you want to override it?</p>`,
+        saveDay,
+      );
+      return;
+    }
+
+    saveDay();
   }
 </script>
 
-<h1 class="text-2xl mb-8">Track what have you eaten today</h1>
+<h1 class="text-2xl mb-8">Track what you have eaten today</h1>
 
 <div class="text-token w-full space-y-2 relative mb-8">
   <span>You can search and include a meal</span>

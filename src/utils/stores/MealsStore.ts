@@ -3,6 +3,8 @@ import { get, type Writable } from 'svelte/store';
 import type { Meal } from '../../types/Meal';
 import { successToast, warningToast } from '../ToastTrigger';
 import { deleteStoredTodayMeal } from './TodayMealsStore';
+import type { Macros } from '../../types/Macros';
+import { anyProgressDayWithThisMeal } from './ProgressStore';
 
 export const mealsStore: Writable<Meal[]> = localStorageStore('meals', []);
 
@@ -44,17 +46,23 @@ export function updateStoredMeal(meal: Meal) {
   successToast(`Meal '${meal.name}' was edited`);
 }
 
-export function deleteStoredMeal(id: string) {
+export function deleteStoredMeal(id: string, simple = false) {
   const meal = getStoredMealById(id);
 
   if (!meal) return;
 
   mealsStore.update((meals) => {
-    const index = meals.indexOf(meal);
-    meals.splice(index, 1);
+    if (anyProgressDayWithThisMeal(meal.id)) {
+      (meals.find(m => m.id === meal.id) as Meal).archived = true;
+    } else {
+      const index = meals.indexOf(meal);
+      meals.splice(index, 1);
+    }
     return meals;
   });
 
+  if (simple) return;
+  
   warningToast(`Meal '${meal.name}' was deleted from your list`);
 
   deleteStoredTodayMeal(meal);
