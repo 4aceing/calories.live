@@ -1,6 +1,6 @@
 <script lang="ts">
-  // import '../theme.css';
-  import '@skeletonlabs/skeleton/themes/theme-skeleton.css';
+  import '../theme.css';
+  // import '@skeletonlabs/skeleton/themes/theme-vintage.css';
   import '@skeletonlabs/skeleton/styles/skeleton.css';
   import '../app.css';
   import { AppShell, AppBar, Modal, Drawer, drawerStore, Toast, setInitialClassState } from '@skeletonlabs/skeleton';
@@ -19,9 +19,9 @@
 
 <svelte:head>
   {#if $modeCurrent}
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#D9D5D5" />
   {:else}
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#1A1C26" />
   {/if}
 </svelte:head>
 
