@@ -7,7 +7,7 @@
   import { imageToBase64AndResize } from '../../../utils/ImageProcess';
   import { goto } from '$app/navigation';
   import { v4 as uuidv4 } from 'uuid';
-  import { addStoredMeal, mealsStore } from '../../../utils/stores/MealsStore';
+  import { addMeal } from '../../../utils/stores/MealsStore';
 
   let imagePreview = '';
   let imageUrlInput: HTMLInputElement;
@@ -29,10 +29,10 @@
     imagePreview = imageUrlInput.value && imageUrlInput.validity.valid ? imageUrlInput.value : '';
   }
 
-  function addMeal() {
+  function addNewMeal() {
     model.imageUrl = imagePreview || undefined;
 
-    addStoredMeal(model);
+    addMeal(model);
 
     goto('/meals');
   }
@@ -45,7 +45,7 @@
 
 <h1 class="text-2xl mb-8">Add new meal for later use</h1>
 
-<form on:submit|preventDefault={addMeal} class="space-y-6">
+<form on:submit|preventDefault={addNewMeal} class="space-y-6">
   <label class="label">
     <span>Name</span>
     <input bind:value={model.name} class="input variant-form-material" type="text" required />

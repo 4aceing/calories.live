@@ -2,21 +2,20 @@ import { localStorageStore } from '@skeletonlabs/skeleton';
 import { get, type Writable } from 'svelte/store';
 import type { Meal } from '../../types/Meal';
 import { successToast, warningToast } from '../ToastTrigger';
-import { deleteStoredTodayMeal } from './TodayMealsStore';
-import type { Macros } from '../../types/Macros';
+import { deleteTodayMeal } from './TodayMealsStore';
 import { anyProgressDayWithThisMeal } from './ProgressStore';
 
 export const mealsStore: Writable<Meal[]> = localStorageStore('meals', []);
 
-export function getStoredMealById(id: string) {
+export function getMealById(id: string) {
   return get(mealsStore).find((m) => m.id === id);
 }
 
-export function getStoredMealByName(name: string) {
+export function getMealByName(name: string) {
   return get(mealsStore).find((m) => m.name === name);
 }
 
-export function addStoredMeal(meal: Meal) {
+export function addMeal(meal: Meal) {
   mealsStore.update((meals) => {
     meal.protein = +parseFloat(`${meal.protein}`).toFixed(2);
     meal.carbs = +parseFloat(`${meal.carbs}`).toFixed(2);
@@ -30,7 +29,7 @@ export function addStoredMeal(meal: Meal) {
   successToast(`Meal '${meal.name}' was added to your list`);
 }
 
-export function updateStoredMeal(meal: Meal) {
+export function updateMeal(meal: Meal) {
   mealsStore.update((meals) => {
     meal.updatedAtTimestamp = Date.now();
     meal.protein = +parseFloat(`${meal.protein}`).toFixed(2);
@@ -46,8 +45,8 @@ export function updateStoredMeal(meal: Meal) {
   successToast(`Meal '${meal.name}' was edited`);
 }
 
-export function deleteStoredMeal(id: string, simple = false) {
-  const meal = getStoredMealById(id);
+export function deleteMeal(id: string, simple = false) {
+  const meal = getMealById(id);
 
   if (!meal) return;
 
@@ -55,7 +54,7 @@ export function deleteStoredMeal(id: string, simple = false) {
     if (anyProgressDayWithThisMeal(meal.id)) {
       (meals.find(m => m.id === meal.id) as Meal).archived = true;
     } else {
-      const index = meals.indexOf(meal);
+      const index = meals.findIndex(m => m.id === meal.id);
       meals.splice(index, 1);
     }
     return meals;
@@ -65,5 +64,5 @@ export function deleteStoredMeal(id: string, simple = false) {
   
   warningToast(`Meal '${meal.name}' was deleted from your list`);
 
-  deleteStoredTodayMeal(meal);
+  deleteTodayMeal(meal);
 }

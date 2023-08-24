@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { Meal } from '../../types/Meal';
-  import { getStoredMealById } from '../../utils/stores/MealsStore';
+  import { getMealById } from '../../utils/stores/MealsStore';
   import { progressStore } from '../../utils/stores/ProgressStore';
 
   $: avgMacros = $progressStore.reduce(
     (total, day, i) => {
       const dayMacros = day.meals.reduce(
         (mealTotal, todayMeal) => {
-          const meal = getStoredMealById(todayMeal.id) as Meal;
+          const meal = getMealById(todayMeal.id) as Meal;
           const ratio = todayMeal.quantity / (meal.grams || 1);
           mealTotal.calories += ratio * meal.calories;
           mealTotal.protein += ratio * meal.protein;

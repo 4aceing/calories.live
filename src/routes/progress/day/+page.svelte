@@ -4,13 +4,13 @@
   import { errorToast } from '../../../utils/ToastTrigger.js';
   import { goto } from '$app/navigation';
   import type { StoredProgress, TodayMealWithFallback } from '../../../types/Progress.js';
-  import { getStoredMealById } from '../../../utils/stores/MealsStore.js';
+  import { getMealById } from '../../../utils/stores/MealsStore.js';
   import type { TodayMeal } from '../../../types/TodayMeal.js';
   import { MealCalculatedAs } from '../../../types/Meal.js';
   import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
   import MdiEyeArrowLeftOutline from '~icons/mdi/eye-arrow-left-outline';
   import { confirmModal } from '../../../utils/ModalTrigger.js';
-  import { addStoredTodayMeal, todayMealsStore } from '../../../utils/stores/TodayMealsStore.js';
+  import { addTodayMeal, todayMealsStore } from '../../../utils/stores/TodayMealsStore.js';
 
   export let data;
 
@@ -19,7 +19,7 @@
   const day = getProgressByDate(date) || ({ meals: [] as TodayMealWithFallback[] } as StoredProgress);
 
   const meals = day.meals.map((dayMeal) => {
-    const meal = getStoredMealById(dayMeal.id) as TodayMeal;
+    const meal = getMealById(dayMeal.id) as TodayMeal;
 
     meal.quantity = dayMeal.quantity;
     meal.computedCalories = +parseFloat(`${(meal.quantity / (meal.grams || 1)) * meal.calories}`).toFixed(2);
@@ -72,7 +72,7 @@
         meals
           .filter((m) => !m.archived)
           .forEach((m) => {
-            addStoredTodayMeal(m);
+            addTodayMeal(m);
           });
 
         goto('/today');

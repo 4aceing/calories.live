@@ -8,12 +8,12 @@ import type { StoredProgress, TodayMealWithFallback } from '../../types/Progress
 
 export const todayMealsStore: Writable<StoredTodayMeal[]> = localStorageStore('todayMeals', []);
 
-export function getStoredTodayMealById(id: string) {
+export function getTodayMealById(id: string) {
   return get(todayMealsStore).find((m) => m.id === id);
 }
 
-export function addStoredTodayMeal(meal: Meal) {
-  if (getStoredTodayMealById(meal.id)) {
+export function addTodayMeal(meal: Meal) {
+  if (getTodayMealById(meal.id)) {
     errorToast(`Meal '${meal.name}' is already included in today's list`);
 
     return;
@@ -30,7 +30,7 @@ export function addStoredTodayMeal(meal: Meal) {
   successToast(`Included '${meal.name}' into today's list of meals`);
 }
 
-export function updateStoredTodayMealQuantity(id: string, quantity: number) {
+export function updateTodayMealQuantity(id: string, quantity: number) {
   todayMealsStore.update((todayMeals) => {
     const todayMeal = todayMeals.find((todayMeal) => todayMeal.id === id);
 
@@ -42,13 +42,13 @@ export function updateStoredTodayMealQuantity(id: string, quantity: number) {
   });
 }
 
-export function deleteStoredTodayMeal(meal: Meal) {
-  const todayMeal = getStoredTodayMealById(meal.id);
+export function deleteTodayMeal(meal: Meal) {
+  const todayMeal = getTodayMealById(meal.id);
 
   if (!todayMeal) return;
 
   todayMealsStore.update((todayMeals) => {
-    const index = todayMeals.indexOf(todayMeal);
+    const index = todayMeals.findIndex(m => m.id === todayMeal.id);
     todayMeals.splice(index, 1);
     return todayMeals;
   });
@@ -56,7 +56,7 @@ export function deleteStoredTodayMeal(meal: Meal) {
   warningToast(`Excluded '${meal.name}' from today's list of meals`);
 }
 
-export function finishStoredTodayMeal(date: string, todayMeals: TodayMeal[]) {
+export function finishTodayMeal(date: string, todayMeals: TodayMeal[]) {
   progressStore.update((days) => {
     if (getProgressByDate(date)) {
       const day = days.find((d) => d.date === date) as StoredProgress;

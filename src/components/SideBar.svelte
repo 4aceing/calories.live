@@ -1,5 +1,8 @@
-<script>
+<script lang="ts">
+  import { page } from '$app/stores';
   import { LightSwitch, drawerStore } from '@skeletonlabs/skeleton';
+
+  $: classesActive = (path: string) => ($page.url.pathname.includes(path) ? '!bg-primary-500' : '');
 
   function closeDrawer() {
     drawerStore.close();
@@ -10,17 +13,17 @@
   <nav class="list-nav">
     <ul>
       <li>
-        <a on:click={closeDrawer} href="/meals">All Saved Meals</a>
+        <a on:click={closeDrawer} href="/meals" class={classesActive('/meals')}>All Saved Meals</a>
       </li>
       <li>
-        <a on:click={closeDrawer} href="/today">Today's Meals</a>
+        <a on:click={closeDrawer} href="/today" class={classesActive('/today')}>Today's Meals</a>
       </li>
       <li>
-        <a on:click={closeDrawer} href="/progress">Progress</a>
+        <a on:click={closeDrawer} href="/progress" class={classesActive('/progress')}>Progress</a>
       </li>
-      <li>
-        <a on:click={closeDrawer} href="/about">About</a>
-      </li>
+      <!-- <li>
+        <a on:click={closeDrawer} href="/about" class={classesActive('/about')}>About</a>
+      </li> -->
     </ul>
   </nav>
 

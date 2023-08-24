@@ -9,17 +9,17 @@
   import { onMount } from 'svelte';
   import { errorToast } from '../../../utils/ToastTrigger';
   import {
-    getStoredMealById,
-    getStoredMealByName,
+    getMealById,
+    getMealByName,
     mealsStore,
-    updateStoredMeal,
+    updateMeal,
   } from '../../../utils/stores/MealsStore';
 
   export let data;
 
   const mealId = data.id || '';
 
-  const model = getStoredMealById(mealId) || ({} as Meal);
+  const model = getMealById(mealId) || ({} as Meal);
 
   const initialName = model.name;
 
@@ -27,7 +27,7 @@
   let imageUrlInput: HTMLInputElement;
 
   onMount(() => {
-    if (!getStoredMealById(mealId)) {
+    if (!getMealById(mealId)) {
       errorToast('Meal was not found for editing');
 
       goto('/meals');
@@ -46,7 +46,7 @@
   }
 
   function editMeal() {
-    if (initialName !== model.name && getStoredMealByName(model.name)) {
+    if (initialName !== model.name && getMealByName(model.name)) {
       errorToast(`A meal named '${model.name}' already exists`);
 
       return;
@@ -54,7 +54,7 @@
 
     model.imageUrl = imagePreview || undefined;
 
-    updateStoredMeal(model);
+    updateMeal(model);
 
     goto('/meals');
   }

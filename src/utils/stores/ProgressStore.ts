@@ -2,7 +2,7 @@ import { localStorageStore } from '@skeletonlabs/skeleton';
 import { get, type Writable } from 'svelte/store';
 import type { StoredProgress } from '../../types/Progress';
 import { warningToast } from '../ToastTrigger';
-import { deleteStoredMeal, getStoredMealById } from './MealsStore';
+import { deleteMeal, getMealById } from './MealsStore';
 import type { Meal } from '../../types/Meal';
 
 export const progressStore: Writable<StoredProgress[]> = localStorageStore('progress', []);
@@ -21,7 +21,7 @@ export function deleteProgressDay(date: string) {
   if (!day) return;
 
   progressStore.update((days) => {
-    const index = days.indexOf(day);
+    const index = days.findIndex(d => d.date === day.date);
     days.splice(index, 1);
     return days;
   });
@@ -29,12 +29,12 @@ export function deleteProgressDay(date: string) {
   warningToast(`Day '${date}' was deleted from your progress`);
 
   day.meals.forEach((m) => {
-    const meal = getStoredMealById(m.id) as Meal;
+    const meal = getMealById(m.id) as Meal;
 
     if (!meal.archived) return;
 
     if (!anyProgressDayWithThisMeal(meal.id)) {
-      deleteStoredMeal(meal.id);
+      deleteMeal(meal.id, true);
     }
   });
 }

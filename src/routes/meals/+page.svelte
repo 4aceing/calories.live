@@ -2,7 +2,7 @@
   import MealCardActions from '../../components/MealCardActions.svelte';
   import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
   import { MealCalculatedAs } from '../../types/Meal';
-  import { deleteStoredMeal, mealsStore } from '../../utils/stores/MealsStore';
+  import { deleteMeal, mealsStore } from '../../utils/stores/MealsStore';
 
   export let data;
 
@@ -24,7 +24,7 @@
   {#each filteredMeals as meal}
     <div class="card overflow-hidden flex flex-col relative">
       <div class="absolute top-1 right-1">
-        <MealCardActions {meal} on:delete={() => deleteStoredMeal(meal.id)} />
+        <MealCardActions {meal} on:delete={() => deleteMeal(meal.id)} />
       </div>
 
       <header

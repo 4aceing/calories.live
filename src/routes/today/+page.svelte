@@ -7,18 +7,18 @@
   import { goto } from '$app/navigation';
   import type { TodayMeal } from '../../types/TodayMeal';
   import {
-    addStoredTodayMeal,
-    deleteStoredTodayMeal,
-    finishStoredTodayMeal,
+    addTodayMeal,
+    deleteTodayMeal,
+    finishTodayMeal,
     todayMealsStore,
-    updateStoredTodayMealQuantity,
+    updateTodayMealQuantity,
   } from '../../utils/stores/TodayMealsStore';
-  import { getStoredMealById, mealsStore } from '../../utils/stores/MealsStore';
+  import { getMealById, mealsStore } from '../../utils/stores/MealsStore';
   import { confirmModal } from '../../utils/ModalTrigger';
   import { getProgressByDate } from '../../utils/stores/ProgressStore';
 
   $: todayMeals = $todayMealsStore.map((todayMeal) => {
-    const meal = getStoredMealById(todayMeal.id) as TodayMeal;
+    const meal = getMealById(todayMeal.id) as TodayMeal;
 
     meal.quantity = todayMeal.quantity;
     meal.computedCalories = meal.calories;
@@ -80,7 +80,7 @@
   function includeMeal(event: CustomEvent<AutocompleteOption>) {
     const meal = event.detail.value as Meal;
 
-    addStoredTodayMeal(meal);
+    addTodayMeal(meal);
   }
 
   function updateNutritionalValues(meal: Meal, event: Event) {
@@ -88,12 +88,12 @@
 
     const quantity = +input.value || 0;
 
-    updateStoredTodayMealQuantity(meal.id, quantity);
+    updateTodayMealQuantity(meal.id, quantity);
   }
 
   function finishDay() {
     const saveDay = () => {
-      finishStoredTodayMeal(trackDate, todayMeals);
+      finishTodayMeal(trackDate, todayMeals);
 
       goto(`/progress/day?date=${trackDate}`);
     };
@@ -227,7 +227,7 @@
             </button>
 
             <button
-              on:click={() => deleteStoredTodayMeal(meal)}
+              on:click={() => deleteTodayMeal(meal)}
               class="btn-icon variant-filled-error"
               title="Exclude Meal"
             >
