@@ -4,7 +4,6 @@
   import UilImageUpload from '~icons/uil/image-upload';
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import { MealCalculatedAs, type Meal } from '../../../types/Meal';
-  import { imageToBase64AndResize } from '../../../utils/ImageProcess';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { errorToast } from '../../../utils/ToastTrigger';
@@ -14,6 +13,8 @@
     mealsStore,
     updateMeal,
   } from '../../../utils/stores/MealsStore';
+  import { fileToBase64, imageUrlToBase64, resizeBase64Image } from '../../../utils/ImageProcess';
+  import { addMealImage, deleteMealImage } from '../../../utils/IndexedDb';
 
   export let data;
 
@@ -38,14 +39,19 @@
     const target = event.target as HTMLInputElement;
     const file = target.files![0];
 
-    imagePreview = await imageToBase64AndResize(file, 560, 240);
+    imagePreview = await resizeBase64Image(await fileToBase64(file), 560, 240);
   }
 
-  function imageUrl() {
-    imagePreview = imageUrlInput.value && imageUrlInput.validity.valid ? imageUrlInput.value : '';
+  async function imageUrl() {
+    if (!imageUrlInput.value || !imageUrlInput.validity.valid) {
+      imagePreview = '';
+      return;
+    }
+
+    imagePreview = await resizeBase64Image(await imageUrlToBase64(imageUrlInput.value), 560, 240);
   }
 
-  function editMeal() {
+  async function editMeal() {
     if (initialName !== model.name && getMealByName(model.name)) {
       errorToast(`A meal named '${model.name}' already exists`);
 
@@ -55,6 +61,12 @@
     model.imageUrl = imagePreview || undefined;
 
     updateMeal(model);
+
+    if (imagePreview) {
+      await addMealImage(model.id, model.name, imagePreview);
+    } else {
+      deleteMealImage(model.id);
+    }
 
     goto('/meals');
   }

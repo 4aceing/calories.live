@@ -3,14 +3,21 @@
   import IconParkOutlineDisabledPicture from '~icons/icon-park-outline/disabled-picture';
   import { MealCalculatedAs } from '../../types/Meal';
   import { deleteMeal, mealsStore } from '../../utils/stores/MealsStore';
+  import { deleteMealImage, getMealImage } from '../../utils/IndexedDb';
 
   export let data;
 
   let searchValue = data.search || '';
 
-  $: filteredMeals = $mealsStore.filter(m => !m.archived).filter(
-    (meal) => meal.name.includes(searchValue) || meal.description.includes(searchValue),
-  );
+  $: filteredMeals = $mealsStore
+    .filter((m) => !m.archived)
+    .filter((meal) => meal.name.includes(searchValue) || meal.description.includes(searchValue));
+
+  function deleteMealFromList(id: string) {
+    deleteMeal(id);
+
+    deleteMealImage(id);
+  }
 </script>
 
 <h1 class="text-2xl mb-8">Find all of your saved meals</h1>
@@ -24,12 +31,23 @@
   {#each filteredMeals as meal}
     <div class="card overflow-hidden flex flex-col relative">
       <div class="absolute top-1 right-1">
-        <MealCardActions {meal} on:delete={() => deleteMeal(meal.id)} />
+        <MealCardActions {meal} on:delete={() => deleteMealFromList(meal.id)} />
       </div>
 
       <header
         class="aspect-[21/9] overflow-hidden bg-surface/50 {meal.imageUrl ? '' : 'flex items-center justify-center'}"
       >
+        <!-- {#await getMealImage(meal.id)}
+          <IconParkOutlineDisabledPicture class="text-4xl opacity-50" />
+        {:then base64Image}
+          {#if base64Image}
+            <img loading="lazy" src={base64Image} class="w-full" alt={meal.name} />
+          {:else}
+            <IconParkOutlineDisabledPicture class="text-4xl opacity-50" />
+          {/if}
+        {:catch error}
+          <IconParkOutlineDisabledPicture class="text-4xl opacity-50" />
+        {/await} -->
         {#if meal.imageUrl}
           <img loading="lazy" src={meal.imageUrl} class="w-full" alt={meal.name} />
         {:else}

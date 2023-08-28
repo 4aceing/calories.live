@@ -4,10 +4,11 @@
   import UilImageUpload from '~icons/uil/image-upload';
   import MaterialSymbolsDeleteOutline from '~icons/material-symbols/delete-outline';
   import { MealCalculatedAs, type Meal } from '../../../types/Meal';
-  import { imageToBase64AndResize } from '../../../utils/ImageProcess';
   import { goto } from '$app/navigation';
   import { v4 as uuidv4 } from 'uuid';
   import { addMeal } from '../../../utils/stores/MealsStore';
+  import { fileToBase64, imageUrlToBase64, resizeBase64Image } from '../../../utils/ImageProcess';
+  import { addMealImage } from '../../../utils/IndexedDb';
 
   let imagePreview = '';
   let imageUrlInput: HTMLInputElement;
@@ -22,17 +23,26 @@
     const target = event.target as HTMLInputElement;
     const file = target.files![0];
 
-    imagePreview = await imageToBase64AndResize(file, 560, 240);
+    imagePreview = await resizeBase64Image(await fileToBase64(file), 560, 240);
   }
 
-  function imageUrl() {
-    imagePreview = imageUrlInput.value && imageUrlInput.validity.valid ? imageUrlInput.value : '';
+  async function imageUrl() {
+    if (!imageUrlInput.value || !imageUrlInput.validity.valid) {
+      imagePreview = '';
+      return;
+    }
+
+    imagePreview = await resizeBase64Image(await imageUrlToBase64(imageUrlInput.value), 560, 240);
   }
 
-  function addNewMeal() {
+  async function addNewMeal() {
     model.imageUrl = imagePreview || undefined;
 
     addMeal(model);
+
+    if (imagePreview) {
+      await addMealImage(model.id, model.name, imagePreview);
+    }
 
     goto('/meals');
   }
@@ -53,7 +63,7 @@
 
   <label class="label">
     <span>Description</span>
-    <textarea bind:value={model.description} class="textarea variant-form-material" rows="4" required />
+    <textarea bind:value={model.description} class="textarea variant-form-material" rows="3" required />
   </label>
 
   <div class="grid gap-6 grid-cols-1 sm:grid-cols-[auto_1fr]">
@@ -114,7 +124,7 @@
     <div class="label">
       <span>Image Preview</span>
       <div
-        class="aspect-[21/9] max-w-sm overflow-hidden border-2 border-solid border-surface-500 rounded-container-token relative"
+        class="aspect-[21/9] max-w-sm border-2 border-solid border-surface-500 rounded-container-token relative"
       >
         <button on:click={() => (imagePreview = '')} class="btn-icon variant-filled-secondary absolute top-1 right-1">
           <MaterialSymbolsDeleteOutline />

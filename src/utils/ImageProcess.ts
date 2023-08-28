@@ -10,28 +10,36 @@ export function fileToBase64(file: File) {
   });
 }
 
-export function imageToBase64AndResize(file: File, width: number, height: number) {
+export function resizeBase64Image(base64: string, width: number, height: number) {
   return new Promise<string>((resolve) => {
-    const fileReader = new FileReader();
-    fileReader.readAsDataURL(file);
+    const img = document.createElement('img');
+    img.src = base64;
 
-    fileReader.onload = () => {
-      const img = document.createElement('img');
-      img.src = fileReader.result as string;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+      canvas.width = width;
+      canvas.height = height;
 
-        context.drawImage(img, 0, 0, width, height);
+      context.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        const dataUrl = canvas.toDataURL(file.type);
-        resolve(dataUrl);
-      };
-
-      img.onerror = () => resolve('');
+      resolve(canvas.toDataURL());
     };
 
-    fileReader.onerror = () => resolve('');
+    img.onerror = () => resolve('');
+  });
+}
+
+export async function imageUrlToBase64(url: string) {
+  const response = await fetch(url);
+
+  const blob = await response.blob();
+  
+  return await new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = () => resolve('');
+    reader.readAsDataURL(blob);
   });
 }
