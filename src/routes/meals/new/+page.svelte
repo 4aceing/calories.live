@@ -123,9 +123,7 @@
   {#if imagePreview}
     <div class="label">
       <span>Image Preview</span>
-      <div
-        class="aspect-[21/9] max-w-sm border-2 border-solid border-surface-500 rounded-container-token relative"
-      >
+      <div class="aspect-[21/9] max-w-sm border-2 border-solid border-surface-500 rounded-container-token relative">
         <button on:click={() => (imagePreview = '')} class="btn-icon variant-filled-secondary absolute top-1 right-1">
           <MaterialSymbolsDeleteOutline />
         </button>

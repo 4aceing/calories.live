@@ -21,7 +21,7 @@ export function deleteProgressDay(date: string) {
   if (!day) return;
 
   progressStore.update((days) => {
-    const index = days.findIndex(d => d.date === day.date);
+    const index = days.findIndex((d) => d.date === day.date);
     days.splice(index, 1);
     return days;
   });

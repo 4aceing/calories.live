@@ -63,13 +63,15 @@
   let trackDate = new Date().toISOString().slice(0, 10);
   let inputSearch: string = '';
 
-  let searchMeals = $mealsStore.filter(m => !m.archived).map(
-    (meal) =>
-      ({
-        label: meal.name,
-        value: meal,
-      } as AutocompleteOption),
-  );
+  let searchMeals = $mealsStore
+    .filter((m) => !m.archived)
+    .map(
+      (meal) =>
+        ({
+          label: meal.name,
+          value: meal,
+        } as AutocompleteOption),
+    );
 
   let popupSeachMeal: PopupSettings = {
     event: 'focus-click',
@@ -226,11 +228,7 @@
               <MdiEyeArrowLeftOutline />
             </button>
 
-            <button
-              on:click={() => deleteTodayMeal(meal)}
-              class="btn-icon variant-filled-error"
-              title="Exclude Meal"
-            >
+            <button on:click={() => deleteTodayMeal(meal)} class="btn-icon variant-filled-error" title="Exclude Meal">
               <MaterialSymbolsDeleteOutline />
             </button>
           </div>

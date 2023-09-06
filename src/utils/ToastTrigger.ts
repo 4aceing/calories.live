@@ -20,3 +20,10 @@ export function errorToast(message: string) {
     background: 'variant-filled-error',
   });
 }
+
+export function infoToast(message: string) {
+  toastStore.trigger({
+    message,
+    background: 'variant-filled-surface',
+  });
+}

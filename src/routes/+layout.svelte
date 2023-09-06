@@ -9,11 +9,13 @@
   import CharmMenuHamburger from '~icons/charm/menu-hamburger';
   import { modeCurrent } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
+  import { initializeFirebaseApp } from '../utils/FirebaseDatabase';
 
   $: positionClasses = $drawerStore.open ? 'translate-x-[75%]' : '';
 
   onMount(() => {
     setInitialClassState();
+    initializeFirebaseApp();
   });
 </script>
 
@@ -27,7 +29,7 @@
 
 <Modal />
 
-<Toast position="tr" />
+<Toast position="tr" zIndex="z-[1000]" />
 
 <Drawer width="w-[75%]">
   <SideBar />

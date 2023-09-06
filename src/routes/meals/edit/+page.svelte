@@ -7,12 +7,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { errorToast } from '../../../utils/ToastTrigger';
-  import {
-    getMealById,
-    getMealByName,
-    mealsStore,
-    updateMeal,
-  } from '../../../utils/stores/MealsStore';
+  import { getMealById, getMealByName, mealsStore, updateMeal } from '../../../utils/stores/MealsStore';
   import { fileToBase64, imageUrlToBase64, resizeBase64Image } from '../../../utils/ImageProcess';
   import { addMealImage, deleteMealImage } from '../../../utils/IndexedDb';
 

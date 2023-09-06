@@ -48,7 +48,7 @@ export function deleteTodayMeal(meal: Meal) {
   if (!todayMeal) return;
 
   todayMealsStore.update((todayMeals) => {
-    const index = todayMeals.findIndex(m => m.id === todayMeal.id);
+    const index = todayMeals.findIndex((m) => m.id === todayMeal.id);
     todayMeals.splice(index, 1);
     return todayMeals;
   });

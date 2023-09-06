@@ -3,12 +3,15 @@
   import MaterialSymbolsPerson from '~icons/material-symbols/person';
   import CreateProfileModal from './CreateProfileModal.svelte';
   import AccessProfileModal from './AccessProfileModal.svelte';
+  import { dissconnectProfile, profileStore } from '../utils/stores/ProfileStore';
 
-  const popupSettings: PopupSettings = {
+  $: profile = $profileStore.name;
+
+  $: popupSettings = {
     event: 'click',
-    target: 'popupProfile',
+    target: profile ? 'popupActiveProfile' : 'popupProfile',
     placement: 'bottom-end',
-  };
+  } as PopupSettings;
 
   const modalCreateProfile: ModalSettings = {
     type: 'component',
@@ -27,10 +30,12 @@
 
 <figure
   use:popup={popupSettings}
-  class="flex aspect-square text-surface-50 font-semibold justify-center items-center overflow-hidden isolate bg-surface-400-500-token w-10 border-4 border-surface-300-600-token hover:!border-primary-500 rounded-full cursor-pointer"
+  class="flex aspect-square text-surface-50 font-semibold justify-center items-center overflow-hidden isolate {profile
+    ? 'bg-primary-400-500-token'
+    : 'bg-surface-400-500-token'} w-10 border-4 border-surface-300-600-token hover:!border-primary-500 rounded-full cursor-pointer"
   title="Profile"
 >
-  <MaterialSymbolsPerson class="variant-filled !bg-transparent w-6 h-6" />
+  <MaterialSymbolsPerson class="{profile ? 'variant-filled-primary' : 'variant-filled'} !bg-transparent w-6 h-6" />
 </figure>
 
 <div class="card w-56 shadow-xl p-4 space-y-4" data-popup="popupProfile">
@@ -50,5 +55,13 @@
     class="btn btn-sm variant-ringed-primary w-full"
   >
     Access Profile
+  </button>
+</div>
+
+<div class="card w-56 shadow-xl p-4 space-y-4" data-popup="popupActiveProfile">
+  <p class="text-sm text-center">Connected with profile '{profile}'</p>
+
+  <button on:click={() => dissconnectProfile()} type="button" class="btn btn-sm variant-ringed-error w-full">
+    Dissconnect
   </button>
 </div>

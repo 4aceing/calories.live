@@ -18,4 +18,4 @@ export interface Meal {
 export enum MealCalculatedAs {
   PerProduct,
   PerGrams,
-} 
+}

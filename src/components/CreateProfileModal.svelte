@@ -1,47 +1,80 @@
 <script lang="ts">
+  import { createProfile, getSavedPasswordOfProfile } from '../utils/FirebaseDatabase';
+  import { confirmModal } from '../utils/ModalTrigger';
+  import { errorToast, infoToast, successToast, warningToast } from '../utils/ToastTrigger';
+  import { mealsStore } from '../utils/stores/MealsStore';
+  import { setProfile } from '../utils/stores/ProfileStore';
+  import { progressStore } from '../utils/stores/ProgressStore';
+  import { todayMealsStore } from '../utils/stores/TodayMealsStore';
   import BaseModal from './building-blocks/BaseModal.svelte';
   import { modalStore } from '@skeletonlabs/skeleton';
 
   let submitFormButton: HTMLButtonElement;
-  let removeClassTimeout: NodeJS.Timeout;
 
-  function addErrorClassToInput(event: Event) {
-    const input = event.target as HTMLInputElement;
+  let profile = {
+    name: '',
+    password: undefined,
+  };
 
-    input.classList.add('input-error');
+  async function createNewProfile() {
+    const succedded = await createProfile(profile.name, profile.password);
 
-    removeClassTimeout = setTimeout(() => {
-      input.classList.remove('input-error');
-    }, 5000);
-  }
+    if (succedded) {
+      successToast(`Profile '${profile.name}' created`);
 
-  function removeErrorClassToInput(event: Event) {
-    const input = event.target as HTMLInputElement;
+      setProfile(profile.name, await getSavedPasswordOfProfile(profile.name));
 
-    input.classList.remove('input-error');
+      if ($mealsStore.length) {
+        confirmModal(
+          `<p>You seem to have data saved locally</p>
+           <p>Do you want to transfer it to the newly created profile?</p>
+           <p>All data will be lost if you choose to not transfer it</p>`,
+          () => {
+            // transfer data to firestore
 
-    clearTimeout(removeClassTimeout);
+            successToast(`All locally saved data was transfered to the profile`);
+          },
+          () => {
+            warningToast(`All locally saved data was lost`);
+          },
+          () => {
+            mealsStore.set([]);
+            todayMealsStore.set([]);
+            progressStore.set([]);
+
+            modalStore.close();
+
+            infoToast(`Any data you save on a profile will persisit on that profile`);
+          },
+        );
+      } else {
+        infoToast(`Any data you save on a profile will persisit on that profile`);
+      }
+
+      modalStore.close();
+      return;
+    }
+
+    errorToast(`Profile with name '${profile.name}' already exists`);
   }
 </script>
 
 <BaseModal title="Create Profile">
   <svelte:fragment slot="content">
-    <form class="space-y-4">
+    <form class="space-y-4" on:submit|preventDefault={createNewProfile}>
       <label class="label">
         <span>Name</span>
-        <input
-          on:invalid={addErrorClassToInput}
-          on:input={removeErrorClassToInput}
-          on:blur={removeErrorClassToInput}
-          class="input variant-form-material"
-          type="text"
-          required
-        />
+        <input bind:value={profile.name} class="input variant-form-material" name="profile-name" type="text" required />
       </label>
 
       <label class="label">
         <span>Password (optional)</span>
-        <input class="input variant-form-material" type="password" />
+        <input
+          bind:value={profile.password}
+          class="input variant-form-material"
+          name="profile-password"
+          type="password"
+        />
       </label>
 
       <button bind:this={submitFormButton} type="submit" class="hidden" />

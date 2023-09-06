@@ -52,16 +52,16 @@ export function deleteMeal(id: string, simple = false) {
 
   mealsStore.update((meals) => {
     if (anyProgressDayWithThisMeal(meal.id)) {
-      (meals.find(m => m.id === meal.id) as Meal).archived = true;
+      (meals.find((m) => m.id === meal.id) as Meal).archived = true;
     } else {
-      const index = meals.findIndex(m => m.id === meal.id);
+      const index = meals.findIndex((m) => m.id === meal.id);
       meals.splice(index, 1);
     }
     return meals;
   });
 
   if (simple) return;
-  
+
   warningToast(`Meal '${meal.name}' was deleted from your list`);
 
   deleteTodayMeal(meal);
